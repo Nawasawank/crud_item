@@ -39,7 +39,6 @@ const updateItem = async (req, res) => {
         }
         res.send({
             message: "Item updated successfully",
-            item: updatedRows[0]
         });
     } catch (error) {
         console.error("Error updating item:", error);
