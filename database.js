@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
-const userModel = require('./model/stock.js');
-const userModule = require('./model/user.js'); 
+const stockModel = require('./Model/stock.js');
+const userModel = require('./Model/user.js'); 
 
 const sequelize = new Sequelize("crud_item", "root", "snsdforever9", {
     host: "127.0.0.1",
@@ -20,8 +20,16 @@ sequelize.authenticate()
 
 let db = {};
 db.sequelize = sequelize;
-db.Stock = userModel(sequelize, Sequelize); 
-db.User = userModule(sequelize, Sequelize);
+db.Stock = stockModel(sequelize, Sequelize); 
+db.User = userModel(sequelize, Sequelize);
+
+
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
 module.exports = db;
+
 

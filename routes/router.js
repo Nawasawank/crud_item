@@ -23,7 +23,6 @@ route.get('/items', authenticateToken, checkLogout, getAllItems);
 route.put('/updateitem', authenticateToken, checkLogout, updateItem);
 route.delete('/softdelete', authenticateToken, checkLogout, deleteStockItem);
 
-
 module.exports = route;
 
 

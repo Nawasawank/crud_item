@@ -6,7 +6,7 @@ const register = async (req, res) => {
     if (result.error) {
         return res.status(500).send(result.error);
     }
-    res.status(201).send(result.message);
+    res.status(201).send("sign in successful");
 };
 
 module.exports = { register }

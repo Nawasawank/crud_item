@@ -1,5 +1,3 @@
-const moment = require('moment');
-
 module.exports = (sequelize, Sequelize) => {
   const Stock = sequelize.define('Stock', {
     id: {
@@ -28,7 +26,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     price: {
-      type: Sequelize.STRING,  
+      type: Sequelize.INTEGER,
       allowNull: false,
     },
     document: {
@@ -66,12 +64,29 @@ module.exports = (sequelize, Sequelize) => {
     deletedAt: { 
       type: Sequelize.DATE,
       allowNull: true
+    },
+    created_by: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'User', 
+        key: 'id', 
+      },
     }
   }, {
     timestamps: true,  
     paranoid: true      
   });
 
+  Stock.associate = (models) => {
+    Stock.belongsTo(models.User, {
+      foreignKey: 'created_by',
+      as: 'creator',
+    });
+  };
+
   return Stock;
 };
+
+
 

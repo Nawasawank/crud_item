@@ -2,20 +2,22 @@ const { createOneItemService } = require('../services/createoneitem');
 
 const createOneItem = async (req, res) => {
     const { product_code, asset, product_name, product_details, department, price, document, document_ref, pr_creator, importer, name_list, status } = req.body;
-    
+    const createdBy = req.user.id; 
+
     const newItemData = {
-      product_code,
-      asset,
-      product_name,
-      product_details,
-      department,
-      price,
-      document,
-      document_ref,
-      pr_creator,
-      importer,
-      name_list,
-      status
+        product_code,
+        asset,
+        product_name,
+        product_details,
+        department,
+        price,
+        document,
+        document_ref,
+        pr_creator,
+        importer,
+        name_list,
+        status,
+        created_by: createdBy
     };
 
     try {
@@ -28,4 +30,5 @@ const createOneItem = async (req, res) => {
 };
 
 module.exports = { createOneItem };
+
 
