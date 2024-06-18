@@ -8,57 +8,86 @@ const getAllItemsService = async (page, pageSize, search, startDate, endDate, mi
     const limit = pageSize;
     const offset = (page - 1) * pageSize;
 
-    const stockConditions = [];
-    const userConditions = [];
-
-    if (search) {
-        stockConditions.push({
-            product_name: { [Op.substring]: `%${search}%` }
-        });
-    }
-
-    if (startDate && endDate) {
-        stockConditions.push({
-            createdAt: { [Op.between]: [new Date(startDate), new Date(endDate)] }
-        });
-    }
-
-    if (minPrice && maxPrice) {
-        stockConditions.push({
-            price: { [Op.between]: [parseFloat(minPrice), parseFloat(maxPrice)] }
-        });
-    } else if (minPrice) {
-        stockConditions.push({
-            price: { [Op.gte]: parseFloat(minPrice) }
-        });
-    } else if (maxPrice) {
-        stockConditions.push({
-            price: { [Op.lte]: parseFloat(maxPrice) }
-        });
-    }
-
-    if (userId) {
-        stockConditions.push({ created_by: userId });
-    }
-
-    if (username) {
-        userConditions.push({ username: { [Op.like]: `%${username}%` } });
-    }
-
-    const whereClause = stockConditions.length > 0 ? { [Op.and]: [{ deletedAt: null }, { [Op.or]: stockConditions }] } : { deletedAt: null };
-
-    const includeClause = userConditions.length > 0 ? {
-        model: User,
-        as: 'creator',
-        attributes: ['username'],
-        where: { [Op.or]: userConditions }
-    } : {
-        model: User,
-        as: 'creator',
-        attributes: ['username']
-    };
-
     try {
+        const stockConditions = [];
+
+        if (search) {
+            stockConditions.push({
+                product_name: {
+                    [Op.substring]: `%${search}%`,
+                }
+            });
+        }
+
+        if (startDate && endDate) {
+            stockConditions.push({
+                createdAt: {
+                    [Op.between]: [new Date(startDate), new Date(endDate)]
+                }
+            });
+        } else if (startDate) {
+            stockConditions.push({
+                createdAt: {
+                    [Op.gte]: new Date(startDate)
+                }
+            });
+        } else if (endDate) {
+            stockConditions.push({
+                createdAt: {
+                    [Op.lte]: new Date(endDate)
+                }
+            });
+        }
+
+        if (minPrice && maxPrice) {
+            stockConditions.push({
+                price: {
+                    [Op.between]: [parseFloat(minPrice), parseFloat(maxPrice)]
+                }
+            });
+        } else if (minPrice) {
+            stockConditions.push({
+                price: {
+                    [Op.gte]: parseFloat(minPrice)
+                }
+            });
+        } else if (maxPrice) {
+            stockConditions.push({
+                price: {
+                    [Op.lte]: parseFloat(maxPrice)
+                }
+            });
+        }
+
+        if (userId) {
+            stockConditions.push({
+                created_by: userId
+            });
+        }
+
+        const userConditions = [];
+        if (username) {
+            userConditions.push({
+                username: {
+                    [Op.like]: `%${username}%`
+                }
+            });
+        }
+
+        const whereClause = {
+            [Op.and]: [
+                { deletedAt: null },
+                ...stockConditions // Flatten the stock conditions into the AND clause
+            ]
+        };
+
+        const includeClause = {
+            model: User,
+            as: 'creator',
+            attributes: ['username'],
+            where: userConditions.length > 0 ? { [Op.or]: userConditions } : undefined
+        };
+
         const { count, rows } = await Stock.findAndCountAll({
             where: whereClause,
             include: [includeClause],
@@ -69,8 +98,8 @@ const getAllItemsService = async (page, pageSize, search, startDate, endDate, mi
         });
 
         return {
-            rows,
             count,
+            rows,
             page,
             totalPages: Math.ceil(count / limit),
         };
@@ -80,7 +109,6 @@ const getAllItemsService = async (page, pageSize, search, startDate, endDate, mi
 };
 
 module.exports = { getAllItemsService };
-
 
 
 

@@ -2,6 +2,11 @@ const bcrypt = require('bcryptjs');
 
 module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define('User', {
+    id: {
+      type: Sequelize.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
     username: {
       type: Sequelize.STRING,
       unique: true,
@@ -14,7 +19,7 @@ module.exports = (sequelize, Sequelize) => {
   }, {
     timestamps: false,
     freezeTableName: true,
-  tableName: 'users',
+    tableName: 'user',
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {
@@ -33,3 +38,4 @@ module.exports = (sequelize, Sequelize) => {
 
   return User;
 };
+
