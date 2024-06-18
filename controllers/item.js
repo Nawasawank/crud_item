@@ -17,8 +17,8 @@ const getAllItems = async (req, res) => {
         );
 
         res.send({
+            ItemList : rows,
             count: count,
-            rows: rows,
             totalPages: Math.ceil(count / pageSize),
             currentPage: parseInt(page)
         });

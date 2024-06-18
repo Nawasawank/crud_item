@@ -72,6 +72,14 @@ module.exports = (sequelize, Sequelize) => {
         model: 'User', 
         key: 'id', 
       },
+    },
+    product_id: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Product',
+        key: 'id',
+      }
     }
   }, {
     timestamps: true,  
@@ -83,10 +91,15 @@ module.exports = (sequelize, Sequelize) => {
       foreignKey: 'created_by',
       as: 'creator',
     });
+    Stock.belongsTo(models.Product, {
+      foreignKey: 'product_id',
+      as: 'product'
+    });
   };
 
   return Stock;
 };
+
 
 
 

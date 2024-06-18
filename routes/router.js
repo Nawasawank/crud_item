@@ -9,6 +9,8 @@ const { authenticateToken } = require('../controllers/auth');
 const { login } = require('../controllers/login');
 const { register } = require('../controllers/register');
 const { logout, checkLogout } = require('../controllers/logout');
+const { addproduct } = require('../controllers/addproduct');
+const { getCatalogItems } = require('../controllers/catalog')
 
 const route = Router();
 
@@ -22,6 +24,8 @@ route.get('/getoneitembyid', authenticateToken, checkLogout, getItemById);
 route.get('/items', authenticateToken, checkLogout, getAllItems);
 route.put('/updateitem', authenticateToken, checkLogout, updateItem);
 route.delete('/softdelete', authenticateToken, checkLogout, deleteStockItem);
+route.post('/addproduct', addproduct);
+route.get('/catalog',getCatalogItems)
 
 module.exports = route;
 

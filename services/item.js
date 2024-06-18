@@ -8,65 +8,70 @@ const getAllItemsService = async (page, pageSize, search, startDate, endDate, mi
     const limit = pageSize;
     const offset = (page - 1) * pageSize;
 
+    const stockConditions = [];
+    const userConditions = [];
+
+    if (search) {
+        stockConditions.push({
+            product_name: { [Op.substring]: `%${search}%` }
+        });
+    }
+
+    if (startDate && endDate) {
+        stockConditions.push({
+            createdAt: { [Op.between]: [new Date(startDate), new Date(endDate)] }
+        });
+    }
+
+    if (minPrice && maxPrice) {
+        stockConditions.push({
+            price: { [Op.between]: [parseFloat(minPrice), parseFloat(maxPrice)] }
+        });
+    } else if (minPrice) {
+        stockConditions.push({
+            price: { [Op.gte]: parseFloat(minPrice) }
+        });
+    } else if (maxPrice) {
+        stockConditions.push({
+            price: { [Op.lte]: parseFloat(maxPrice) }
+        });
+    }
+
+    if (userId) {
+        stockConditions.push({ created_by: userId });
+    }
+
+    if (username) {
+        userConditions.push({ username: { [Op.like]: `%${username}%` } });
+    }
+
+    const whereClause = stockConditions.length > 0 ? { [Op.and]: [{ deletedAt: null }, { [Op.or]: stockConditions }] } : { deletedAt: null };
+
+    const includeClause = userConditions.length > 0 ? {
+        model: User,
+        as: 'creator',
+        attributes: ['username'],
+        where: { [Op.or]: userConditions }
+    } : {
+        model: User,
+        as: 'creator',
+        attributes: ['username']
+    };
+
     try {
-        const stockWhereClause = {
-            deletedAt: null,
-        };
-
-        if (search) {
-            stockWhereClause.product_name = {
-                [Op.like]: `%${search}%`,
-            };
-        }
-
-        if (startDate && endDate) {
-            stockWhereClause.createdAt = {
-                [Op.between]: [new Date(startDate), new Date(endDate)]
-            };
-        }
-
-        if (minPrice && maxPrice) {
-            stockWhereClause.price = {
-                [Op.between]: [parseFloat(minPrice), parseFloat(maxPrice)]
-            };
-        } else if (minPrice) {
-            stockWhereClause.price = {
-                [Op.gte]: parseFloat(minPrice)
-            };
-        } else if (maxPrice) {
-            stockWhereClause.price = {
-                [Op.lte]: parseFloat(maxPrice)
-            };
-        }
-
-        if (userId) {
-            stockWhereClause.created_by = userId;
-        }
-
-        const userWhereClause = {};
-        if (username) {
-            userWhereClause.username = {
-                [Op.like]: `%${username}%`
-            };
-        }
-
         const { count, rows } = await Stock.findAndCountAll({
-            where: stockWhereClause,
-            include: [{
-                model: User,
-                as: 'creator',
-                attributes: ['username'],
-                where: userWhereClause
-            }],
+            where: whereClause,
+            include: [includeClause],
             limit: limit,
             offset: offset,
+            distinct: true,
             logging: console.log
         });
 
         return {
-            count: count,
-            rows: rows,
-            page: page,
+            rows,
+            count,
+            page,
             totalPages: Math.ceil(count / limit),
         };
     } catch (error) {
@@ -75,6 +80,10 @@ const getAllItemsService = async (page, pageSize, search, startDate, endDate, mi
 };
 
 module.exports = { getAllItemsService };
+
+
+
+
 
 
 
