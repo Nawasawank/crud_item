@@ -77,7 +77,7 @@ const getAllItemsService = async (page, pageSize, search, startDate, endDate, mi
         const whereClause = {
             [Op.and]: [
                 { deletedAt: null },
-                ...stockConditions // Flatten the stock conditions into the AND clause
+                ...stockConditions 
             ]
         };
 
